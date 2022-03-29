@@ -56,6 +56,16 @@ def uninstall(conn):
     conn.close()
 
 
+def compare_ans(ans1, ans2, order=False):
+    if len(ans1) != len(ans2):
+        return False
+    if order:
+        
+        return True
+    else:
+    return True
+
+
 # connect, input your own config here
 conn = setup("PJ1", "123456")
 
