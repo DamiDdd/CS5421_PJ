@@ -60,10 +60,11 @@ def compare_ans(ans1, ans2, order=False):
     if len(ans1) != len(ans2):
         return False
     if order:
-        
-        return True
+        return ans1 == ans2
     else:
-    return True
+        sorted_ans1 = sorted(ans1)
+        sorted_ans2 = sorted(ans2)
+        return sorted_ans1 == sorted_ans2
 
 
 # connect, input your own config here
@@ -72,13 +73,20 @@ conn = setup("PJ1", "123456")
 
 sql_test1 = "SELECT per.empid, per.lname " \
             "FROM employee per FULL OUTER JOIN payroll pay  " \
-            "ON per.empid = pay.empid AND pay.salary = 189170 " \
+            "ON per.empid = pay.empid AND pay.salary <> 189170 " \
+            "WHERE per.empid = pay.empid " \
+            "ORDER BY per.empid, per.lname;"
+sql_test2 = "SELECT per.empid, per.lname " \
+            "FROM employee per FULL OUTER JOIN payroll pay  " \
+            "ON per.empid = pay.empid AND pay.salary > 40000 " \
             "WHERE per.empid = pay.empid " \
             "ORDER BY per.empid, per.lname;"
 sql_res1 = exe_sql_with_res(conn, sql_test1)
+sql_res2 = exe_sql_with_res(conn, sql_test2)
 print(sql_res1)
 time = analyse_sql(conn, sql_test1, 100)
 print(time)
+print(compare_ans(sql_res1,sql_res2, True))
 
 # close the connection
 uninstall(conn)
