@@ -16,27 +16,27 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'any secret key'
 conn = sqlite3.connect(DATABASE)
 sql_create_Competition_table = """ CREATE TABLE IF NOT EXISTS Competition (
-                                    id INT PRIMARY KEY,
+                                    id INT PRIMARY KEY AUTO_INCREMENT,
                                     name CHAR(25) NOT NULL,
                                     description VARCHAR(255),
                                     start_time INT,
                                     end_time INT,
-                                    answer_json CHAR(25),
+                                    answer_json CHAR(1000),
                                     type INT
                                 ); """
 #what is submission_ts?
 sql_create_Submission_table = """ CREATE TABLE IF NOT EXISTS Submission (
-                                    id INT PRIMARY KEY,
+                                    id INT PRIMARY KEY AUTO_INCREMENT,
                                     participant_id INT NOT NULL,
                                     submission_ts INT,
-                                    query VARCHAR(2555),
-                                    pass CHAR(1),
+                                    query VARCHAR(1000),
+                                    pass INT,
                                     time_spent INT,
                                     score REAL
                                 ); """
 
 sql_create_Participant_table = """ CREATE TABLE IF NOT EXISTS Participant (
-                                    id INT PRIMARY KEY,
+                                    id INT PRIMARY KEY AUTO_INCREMENT,
                                     submission_count INT
                                 ); """
 
