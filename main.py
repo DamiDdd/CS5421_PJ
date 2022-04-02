@@ -15,6 +15,42 @@ DATABASE = 'database.db' #sql
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'any secret key'
 conn = sqlite3.connect(DATABASE)
+sql_create_Competition_table = """ CREATE TABLE IF NOT EXISTS Competition (
+                                    id INT PRIMARY KEY,
+                                    name CHAR(25) NOT NULL,
+                                    description VARCHAR(255),
+                                    start_time INT,
+                                    end_time INT,
+                                    answer_json CHAR(25),
+                                    type INT
+                                ); """
+#what is submission_ts?
+sql_create_Submission_table = """ CREATE TABLE IF NOT EXISTS Submission (
+                                    id INT PRIMARY KEY,
+                                    participant_id INT NOT NULL,
+                                    submission_ts INT,
+                                    query VARCHAR(2555),
+                                    pass CHAR(1),
+                                    time_spent INT,
+                                    score REAL
+                                ); """
+
+sql_create_Participant_table = """ CREATE TABLE IF NOT EXISTS Participant (
+                                    id INT PRIMARY KEY,
+                                    submission_count INT
+                                ); """
+
+def create_tables():
+    c = conn.cursor()
+    c.execute("SELECT name FROM sqlite_master WHERE type='table';")
+    print(c .fetchall())
+    if not c .fetchall():#no table create
+        c.execute(sql_create_Competition_table)
+        c.execute(sql_create_Submission_table)
+        c.execute(sql_create_Participant_table)
+    conn.commit()
+    conn.close()
+create_tables()
 
 
 @app.route("/")
@@ -22,7 +58,8 @@ def home():
     return "Hello, Flask!"
 
 @app.route('/get_competition', methods=['POST'])
-def get_competition_by_id():
+def get_competition_by_id(competition_id):
+
     return None
 
 @app.route('/list_competitions', methods=['POST'])
