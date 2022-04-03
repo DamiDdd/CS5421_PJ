@@ -1,14 +1,15 @@
 import psycopg2
-import errorMsg as msg
 import re
 
+syntaxMsg = "Syntax error in "
+IOMsg = "IO error: couldn't find "
 
 def exe_sql_with_res(conn, sql):
     pointer = conn.cursor()
     try:
         pointer.execute(sql)
     except psycopg2.Error:
-        print(msg.syntaxMsg + sql)
+        print(syntaxMsg + sql)
     else:
         res = pointer.fetchall()
         return res
@@ -30,14 +31,14 @@ def exe_sql(conn, sql):
     try:
         pointer.execute(sql)
     except psycopg2.Error:
-        print(msg.syntaxMsg)
+        print(syntaxMsg)
 
 
 def exe_sql_file(conn, filepath):
     try:
         f = open(filepath, 'r')
     except IOError:
-        print(msg.IOMsg + filepath)
+        print(IOMsg + filepath)
     else:
         str = f.readlines()
         str = "".join(str)
@@ -47,7 +48,7 @@ def exe_sql_file(conn, filepath):
 def setup(database, password, user="postgres", host="localhost", port="5432"):
     conn = psycopg2.connect(database=database, user=user, password=password, host=host, port=port)
     # init test function
-    exe_sql_file(conn, 'testFunction.sql')
+    print(exe_sql_file(conn, 'sql_analyse/testFunction.sql'))
     return conn
 
 
@@ -68,25 +69,31 @@ def compare_ans(ans1, ans2, order=False):
 
 
 # connect, input your own config here
-conn = setup("PJ1", "123456")
+# conn = setup("PJ1", "123456")
 
-
-sql_test1 = "SELECT per.empid, per.lname " \
-            "FROM employee per FULL OUTER JOIN payroll pay  " \
-            "ON per.empid = pay.empid AND pay.salary <> 189170 " \
-            "WHERE per.empid = pay.empid " \
-            "ORDER BY per.empid, per.lname;"
-sql_test2 = "SELECT per.empid, per.lname " \
-            "FROM employee per FULL OUTER JOIN payroll pay  " \
-            "ON per.empid = pay.empid AND pay.salary > 40000 " \
-            "WHERE per.empid = pay.empid " \
-            "ORDER BY per.empid, per.lname;"
+conn = setup("test1", "")
+sql_test1 = "select * from Submission;"
 sql_res1 = exe_sql_with_res(conn, sql_test1)
-sql_res2 = exe_sql_with_res(conn, sql_test2)
+print("test")
 print(sql_res1)
-time = analyse_sql(conn, sql_test1, 100)
-print(time)
-print(compare_ans(sql_res1,sql_res2, True))
+uninstall(conn)
+
+# sql_test1 = "SELECT per.empid, per.lname " \
+#             "FROM employee per FULL OUTER JOIN payroll pay  " \
+#             "ON per.empid = pay.empid AND pay.salary <> 189170 " \
+#             "WHERE per.empid = pay.empid " \
+#             "ORDER BY per.empid, per.lname;"
+# sql_test2 = "SELECT per.empid, per.lname " \
+#             "FROM employee per FULL OUTER JOIN payroll pay  " \
+#             "ON per.empid = pay.empid AND pay.salary > 40000 " \
+#             "WHERE per.empid = pay.empid " \
+#             "ORDER BY per.empid, per.lname;"
+# sql_res1 = exe_sql_with_res(conn, sql_test1)
+# sql_res2 = exe_sql_with_res(conn, sql_test2)
+# print(sql_res1)
+# time = analyse_sql(conn, sql_test1, 100)
+# print(time)
+# print(compare_ans(sql_res1,sql_res2, True))
 
 # close the connection
-uninstall(conn)
+# uninstall(conn)

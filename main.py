@@ -1,5 +1,6 @@
 import enum
 import json
+from operator import truediv
 from flask import Flask, request, jsonify
 from flask import Flask, render_template, url_for, request, g, flash, redirect
 from flask_sqlalchemy import SQLAlchemy
@@ -11,6 +12,12 @@ from flask_admin.model import BaseModelView
 
 from flask import g
 import sqlite3
+import threading
+import time
+import sql_analyse.linkDataset
+
+# TODO uncomment this line and change it to correct stuff
+db_conn = sql_analyse.linkDataset.setup(database="test1", password="")
 
 DATABASE = "database.db"  # sql
 
@@ -122,21 +129,14 @@ def list_competitions():
     to_ts = record.get("to", 10000)
     c = conn.cursor()
     all_comp = []
-    for i in range(from_ts, to_ts + 1):
-        c.execute(f"SELECT * FROM Competition WHERE id={str(i)};")
-        res = c.fetchall()
-        if res:
-            id, name, des, start, end, _, _ = res[0]
-            # all_comp.append((id,name,des,start,end))
-            all_comp.append(
-                {
-                    "id": id,
-                    "name": name,
-                    "description": des,
-                    "start": start,
-                    "end": end,
-                }
-            )
+    c.execute(
+        f"SELECT id FROM Competition WHERE start_time <{to_ts} AND end_time >{from_ts};"
+    )
+    for i in c.fetchall():
+        id, name, des, start, end, _, _ = i
+        all_comp.append(
+            {"id": id, "name": name, "description": des, "start": start, "end": end}
+        )
     c.close()
     conn.commit()
     print(all_comp)
@@ -187,17 +187,76 @@ def add_submission():
               VALUES({participant_id},{competition_id},"{query}",{submission_ts},{int(submission_status.EVALUATING.value)}) """
     # print(sql)
     try:
-        c.execute(sql)
+        res = c.execute(sql)
+        submission_id = res.lastrowid
+        print(res.lastrowid)
         c.close()
         conn.commit()
-        # TODO start a new thread to evaluate
-        return jsonify({"success": True})
+        x = threading.Thread(
+            target=check_submission,
+            args=(
+                submission_id,
+                competition_id,
+                query,
+            ),
+        )
+        x.start()
+        return jsonify({"success": True, "submission_id": submission_id})
     except Exception as e:
         print(e)
         return jsonify({"success": False})
 
-    # add submission
-    # start a thread to evaluate
+
+def check_submission(submission_id, competition_id, query):
+    get_answer_sql = f"""
+        SELECT answer FROM competition where id = {competition_id}
+    """
+
+    c = conn.cursor()
+    res = c.fetchall()
+    if not res:
+        update_sql = f"""UPDATE submission SET submission_status = {submission_status.FAILED.value} where id = {submission_id} """
+        c.execute(update_sql)
+        c.close()
+        conn.commit()
+
+    answer = res[0]
+    res1 = sql_analyse.linkDataset.exe_sql_with_res(answer)
+    res2 = sql_analyse.linkDataset.exe_sql_with_res(query)
+    passed = sql_analyse.linkDataset.compare_ans(res1, res2, True)
+    if passed:
+        time_spent = sql_analyse.linkDataset.analyse_sql(conn, query, 100)
+        update_sql = f"""UPDATE submission SET submission_status = {submission_status.FAILED.value}, time_spent={time_spent} where id = {submission_id} """
+        c.execute(update_sql)
+        c.close()
+        conn.commit()
+
+        # update submission with pass
+    else:
+        update_sql = f"""UPDATE submission SET submission_status = {submission_status.FAILED.value} where id = {submission_id} """
+        c.execute(update_sql)
+        c.close()
+        conn.commit()
+
+        # update submission with failed
+    # get competition answer
+    # sql_analyse.linkDataset.exe_sql_with_res()
+    # exe_sql_with_res
+    # analyse
+    # update submission
+
+
+@app.route("/test_submission", methods=["GET"])
+def test_submission():
+    x = threading.Thread(target=timeout)
+    x.start()
+    return jsonify({"ok": True})
+
+
+def timeout():
+    for i in range(5):
+        time.sleep(1)
+        print(i)
 
 
 @app.route("/list_submissions_by_competition", methods=["POST"])
