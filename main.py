@@ -105,8 +105,6 @@ def get_competition_by_id():
 
 @app.route("/list_competitions", methods=["POST"])
 def list_competitions():
-    print('fk')
-    print(request.data,'fk')
     record = json.loads(request.data)
     from_ts = record.get("from", 0)
     to_ts = record.get("to", 10000)
