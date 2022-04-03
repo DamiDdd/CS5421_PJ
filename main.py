@@ -1,3 +1,4 @@
+import enum
 import json
 from flask import Flask, request, jsonify
 from flask import Flask, render_template, url_for, request, g, flash, redirect
@@ -40,6 +41,17 @@ sql_create_Participant_table = """ CREATE TABLE IF NOT EXISTS Participant (
                                     id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
                                     submission_count INT
                                 ); """
+
+
+class competition_type(enum.Enum):
+    FASTEST = 1
+    SLOWEST = 2
+
+
+class submission_status(enum.Enum):
+    PASSED = 1
+    FAILED = 2
+    EVALUATING = 3
 
 
 def insert_competition():
@@ -117,7 +129,13 @@ def list_competitions():
             id, name, des, start, end, _, _ = res[0]
             # all_comp.append((id,name,des,start,end))
             all_comp.append(
-                {"id": id, "name": name, "description": des, "start": start, "end": end}
+                {
+                    "id": id,
+                    "name": name,
+                    "description": des,
+                    "start": start,
+                    "end": end,
+                }
             )
     c.close()
     conn.commit()
@@ -149,18 +167,14 @@ def add_competition():
         return jsonify({"success": True})
     except Exception as e:
         print(e)
-        return jsonify(
-            {
-                "success": False,
-            }
-        )
+        return jsonify({"success": False})
 
 
 # add_competition(00,00,00,00,00,0)
 
 
 @app.route("/add_submission", methods=["POST"])
-def add_submission(participant_id, competition_id, query, submission_ts):
+def add_submission():
     # participant_id, competition_id, query, submission_ts
     record = json.loads(request.data)
     participant_id = record.get("participant_id")
@@ -169,25 +183,21 @@ def add_submission(participant_id, competition_id, query, submission_ts):
     submission_ts = record.get("submission_ts")
 
     c = conn.cursor()
-    sql = f""" INSERT INTO submission(participant_id,description,start_time,end_time,answer,type)
-              VALUES("{str(name)}","{str(description)}",{int(start_time)},{int(end_time)},"{str(answer)}",{int(competition_type)}) """
+    sql = f""" INSERT INTO submission(participant_id,competition_id, query, submission_ts, submission_status)
+              VALUES({participant_id},{competition_id},"{query}",{submission_ts},{int(submission_status.EVALUATING.value)}) """
     # print(sql)
     try:
         c.execute(sql)
         c.close()
         conn.commit()
+        # TODO start a new thread to evaluate
         return jsonify({"success": True})
     except Exception as e:
         print(e)
-        return jsonify(
-            {
-                "success": False,
-            }
-        )
+        return jsonify({"success": False})
 
     # add submission
     # start a thread to evaluate
-    return None
 
 
 @app.route("/list_submissions_by_competition", methods=["POST"])
@@ -197,22 +207,38 @@ def list_submissions_by_competition():
     competition_id = record.get("competition_id")
     passed = record.get("passed", None)
     c = conn.cursor()
-    sql = f"""SELECT * FROM competition
-              WHERE competition_id={str(competition_id)}, 
+    sql = f"""SELECT * FROM submission
+              WHERE competition_id={str(competition_id)}
                """
-    sql = sql + ";" if not passed else sql + f" AND status = 2;"
+    sql = sql + ";" if not passed else sql + f" AND submission_status = 2;"
     print(sql)
     c.execute(sql)
     res = c.fetchall()
     all_submissions = []
     for r in res:
-        id, participant_id, submission_ts, query, submission_status, time_spend = r
+        (
+            id,
+            participant_id,
+            competition_id,
+            submission_ts,
+            query,
+            submission_status,
+            time_spend,
+        ) = r
         all_submissions.append(
-            (id, participant_id, submission_ts, query, submission_status, time_spend)
+            {
+                "id": id,
+                "participant_id": participant_id,
+                "competition_id": competition_id,
+                "submission_ts": submission_ts,
+                "query": query,
+                "submission_status": submission_status,
+                "time_spend": time_spend,
+            }
         )
     c.close()
     conn.commit()
-    return all_submissions
+    return jsonify(all_submissions)
 
 
 @app.route("/list_submissions_by_participant", methods=["POST"])
@@ -221,20 +247,36 @@ def list_submissions_by_participant():
     record = json.loads(request.data)
     participant_id = record.get("participant_id")
     c = conn.cursor()
-    sql = f"""SELECT * FROM competition
+    sql = f"""SELECT * FROM submission
               WHERE participant_id={str(participant_id)}
                """
     c.execute(sql)
     res = c.fetchall()
     all_submissions = []
     for r in res:
-        id, participant_id, submission_ts, query, submission_status, time_spend = r
+        (
+            id,
+            participant_id,
+            competition_id,
+            submission_ts,
+            query,
+            submission_status,
+            time_spend,
+        ) = r
         all_submissions.append(
-            (id, participant_id, submission_ts, query, submission_status, time_spend)
+            {
+                "id": id,
+                "participant_id": participant_id,
+                "competition_id": competition_id,
+                "submission_ts": submission_ts,
+                "query": query,
+                "submission_status": submission_status,
+                "time_spend": time_spend,
+            }
         )
     c.close()
     conn.commit()
-    return all_submissions
+    return jsonify(all_submissions)
 
 
 # @app.route('/update_competition', methods=['POST'])
