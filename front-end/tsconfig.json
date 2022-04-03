@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "strict": true,
+    "strictFunctionTypes": false,
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "downlevelIteration": true,
+    "noEmit": true,
+    "target": "es2017",
+    "jsx": "react",
+    "importHelpers": true,
+    "noEmitHelpers": true,
+    "noUnusedLocals": true,
+    "plugins": [{ "name": "typescript-plugin-css-modules" }],
+    "baseUrl": "./"
+  },
+  "include": ["./src"]
+}
