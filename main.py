@@ -226,7 +226,7 @@ def check_submission(submission_id, competition_id, query):
     passed = sql_analyse.linkDataset.compare_ans(res1, res2, True)
     if passed:
         time_spent = sql_analyse.linkDataset.analyse_sql(conn, query, 100)
-        update_sql = f"""UPDATE submission SET submission_status = {submission_status.FAILED.value}, time_spent={time_spent} where id = {submission_id} """
+        update_sql = f"""UPDATE submission SET submission_status = {submission_status.PASSED.value}, time_spent={time_spent} where id = {submission_id} """
         c.execute(update_sql)
         c.close()
         conn.commit()
