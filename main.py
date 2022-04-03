@@ -29,6 +29,7 @@ sql_create_Competition_table = """ CREATE TABLE IF NOT EXISTS Competition (
 sql_create_Submission_table = """ CREATE TABLE IF NOT EXISTS Submission (
                                     id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
                                     participant_id INT NOT NULL,
+                                    competition_id INT NOT NULL,
                                     submission_ts INT,
                                     query VARCHAR(1000),
                                     submission_status INT,
@@ -160,16 +161,47 @@ def add_competition():
 
 @app.route("/add_submission", methods=["POST"])
 def add_submission(participant_id, competition_id, query, submission_ts):
+    # participant_id, competition_id, query, submission_ts
+    record = json.loads(request.data)
+    participant_id = record.get("participant_id")
+    competition_id = record.get("competition_id")
+    query = record.get("query")
+    submission_ts = record.get("submission_ts")
+
+    c = conn.cursor()
+    sql = f""" INSERT INTO submission(participant_id,description,start_time,end_time,answer,type)
+              VALUES("{str(name)}","{str(description)}",{int(start_time)},{int(end_time)},"{str(answer)}",{int(competition_type)}) """
+    # print(sql)
+    try:
+        c.execute(sql)
+        c.close()
+        conn.commit()
+        return jsonify({"success": True})
+    except Exception as e:
+        print(e)
+        return jsonify(
+            {
+                "success": False,
+            }
+        )
+
+    # add submission
+    # start a thread to evaluate
     return None
 
 
 @app.route("/list_submissions_by_competition", methods=["POST"])
-def list_submissions_by_competition(competition_id, passed):
+def list_submissions_by_competition():
+    # competition_id, passed
+    record = json.loads(request.data)
+    competition_id = record.get("competition_id")
+    passed = record.get("passed", None)
     c = conn.cursor()
     sql = f"""SELECT * FROM competition
               WHERE competition_id={str(competition_id)}, 
                """
     sql = sql + ";" if not passed else sql + f" AND status = 2;"
+    print(sql)
     c.execute(sql)
     res = c.fetchall()
     all_submissions = []
@@ -184,7 +216,10 @@ def list_submissions_by_competition(competition_id, passed):
 
 
 @app.route("/list_submissions_by_participant", methods=["POST"])
-def list_submissions_by_participant(participant_id):
+def list_submissions_by_participant():
+    # participant_id
+    record = json.loads(request.data)
+    participant_id = record.get("participant_id")
     c = conn.cursor()
     sql = f"""SELECT * FROM competition
               WHERE participant_id={str(participant_id)}
