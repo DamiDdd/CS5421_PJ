@@ -105,20 +105,17 @@ def get_competition_by_id():
 
 @app.route("/list_competitions", methods=["POST"])
 def list_competitions():
+    print('fk')
+    print(request.data,'fk')
     record = json.loads(request.data)
     from_ts = record.get("from", 0)
     to_ts = record.get("to", 10000)
     c = conn.cursor()
     all_comp = []
-    for i in range(from_ts, to_ts + 1):
-        c.execute(f"SELECT * FROM Competition WHERE id={str(i)};")
-        res = c.fetchall()
-        if res:
-            id, name, des, start, end, _, _ = res[0]
-            # all_comp.append((id,name,des,start,end))
-            all_comp.append(
-                {"id": id, "name": name, "description": des, "start": start, "end": end}
-            )
+    c.execute(f"SELECT * FROM Competition WHERE id NOT IN (SELECT id FROM Competition WHERE start_time >= {to_ts} OR end_time <= {from_ts} );")
+    for i in c.fetchall():
+        id, name, des, start, end, _, _ = i
+        all_comp.append({"id": id, "name": name, "description": des, "start": start, "end": end})
     c.close()
     conn.commit()
     print(all_comp)
@@ -198,7 +195,7 @@ def list_submissions_by_competition():
     passed = record.get("passed", None)
     c = conn.cursor()
     sql = f"""SELECT * FROM competition
-              WHERE competition_id={str(competition_id)}, 
+              WHERE competition_id={str(competition_id)},
                """
     sql = sql + ";" if not passed else sql + f" AND status = 2;"
     print(sql)
