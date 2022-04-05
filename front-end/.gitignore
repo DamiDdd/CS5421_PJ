@@ -1,0 +1,25 @@
+# config
+.vscode/
+.DS_Store
+.idea
+
+# env
+node_modules
+.env
+
+# log
+*.log
+nohup.out
+
+# generated
+/dist
+/profiling
+*.scss.d.ts
+/src/entry.tsx
+
+# archives
+src/_archives
+mock/_archives
+
+# personal
+todo

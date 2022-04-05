@@ -1,0 +1,14 @@
+.contentTitle {
+  display: flex;
+  justify-content: space-between;
+  padding-bottom: 0;
+
+  & > form {
+    margin-left: var(--spacing-base);
+    margin-right: auto;
+  }
+}
+
+.submitQueryButton {
+  margin-left: auto;
+}
