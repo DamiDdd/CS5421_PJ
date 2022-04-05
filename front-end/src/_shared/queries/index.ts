@@ -1,18 +1,22 @@
 import { useQuery, UseQueryOptions } from "react-query";
 import {
-  getCompetition,
+  listCompetitions,
+  getCompetitionResponseData,
   getCompetitionById,
   getCompetitionByIdResponseData,
-  getCompetitionResponseData,
-} from "../api/mockApi";
+  getSubmissions,
+  getSubmissionResponseData,
+} from "../api/api";
+import { getUnixDateTimeRangeForMonth } from "../utils/date";
 
 export enum QueryKey {
   COMPETITION = "COMPETITION",
   COMPETITION_BY_ID = "COMPETITION_BY_ID",
+  SUBMISSION = "SUBMISSION",
 }
 
 export function useCompetitionsQuery(
-  month?: string,
+  month: string,
   options?: UseQueryOptions<
     getCompetitionResponseData,
     unknown,
@@ -20,9 +24,13 @@ export function useCompetitionsQuery(
   >
 ) {
   return useQuery(
-    [QueryKey.COMPETITION],
+    [QueryKey.COMPETITION, { month }],
     async () => {
-      const response = await getCompetition();
+      const [from, to] = getUnixDateTimeRangeForMonth(month);
+      const response = await listCompetitions({
+        from,
+        to,
+      });
       return response;
     },
     options
@@ -30,7 +38,7 @@ export function useCompetitionsQuery(
 }
 
 export function useCompetitionByIdQuery(
-  id: number,
+  id: number | undefined,
   options?: UseQueryOptions<
     getCompetitionByIdResponseData,
     unknown,
@@ -40,7 +48,30 @@ export function useCompetitionByIdQuery(
   return useQuery(
     [QueryKey.COMPETITION_BY_ID, { id }],
     async () => {
-      const response = await getCompetitionById(id);
+      if (typeof id === "undefined") return;
+      const response = await getCompetitionById({
+        competition_id: id,
+      });
+      return response;
+    },
+    options
+  );
+}
+
+export function useSubmissionsQuery(
+  id: number,
+  options?: UseQueryOptions<
+    getSubmissionResponseData,
+    unknown,
+    getSubmissionResponseData
+  >
+) {
+  return useQuery(
+    [QueryKey.SUBMISSION, { id }],
+    async () => {
+      const response = await getSubmissions({
+        competition_id: id,
+      });
       return response;
     },
     options

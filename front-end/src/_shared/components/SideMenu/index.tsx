@@ -15,7 +15,7 @@ const SideMenu = () => {
       className={s.sideMenu}
     >
       <Menu.Item>
-        <Link to={"/competition"}>
+        <Link to={"/"}>
           <ConsoleSqlOutlined translate={undefined} />
           <span>Competition</span>
         </Link>

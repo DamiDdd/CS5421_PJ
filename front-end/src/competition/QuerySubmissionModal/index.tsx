@@ -1,14 +1,15 @@
 import { Form, Input, message, Modal } from "antd";
 import React from "react";
 import { useForm } from "antd/lib/form/Form";
-import { useSubmitQueryMutation } from "src/_shared/mutations";
+import { useAddSubmissionMutation } from "src/_shared/mutations";
+import moment from "moment";
 
 const QUERY_SUBMISSION_FORM_ID = "query-submission-form";
 const requiredRule = { required: true, message: "Required" };
 const whiteSpaceRule = { whitespace: true, message: "Required" };
 
 type QuerySubmissionFormValues = {
-  id: string;
+  participant_id: string;
   answer: string;
 };
 
@@ -19,6 +20,7 @@ type QuerySubmissionFormProps = {
 type QuerySubmissionModalProps = {
   isOpen: boolean;
   onClose: () => void;
+  competitionId: number;
 };
 
 function QuerySubmissionForm(props: QuerySubmissionFormProps) {
@@ -34,13 +36,13 @@ function QuerySubmissionForm(props: QuerySubmissionFormProps) {
       labelCol={{ span: 6 }}
       wrapperCol={{ span: 17 }}
       initialValues={{
-        id: "A12345678B",
+        participant_id: "A12345678B",
         answer: "SELECT A FROM B WHERE C ",
       }}
       onFinish={onSubmit}
     >
       <Form.Item
-        name="id"
+        name="participant_id"
         label="Matric Number"
         rules={[requiredRule, whiteSpaceRule]}
       >
@@ -54,19 +56,23 @@ function QuerySubmissionForm(props: QuerySubmissionFormProps) {
 }
 
 function QuerySubmissionModal(props: QuerySubmissionModalProps) {
-  const { isOpen, onClose } = props;
+  const { isOpen, onClose, competitionId } = props;
 
-  const { mutateAsync: submitQueryMutateAsync, isLoading } =
-    useSubmitQueryMutation();
+  const { mutateAsync: addSubmissionMutateAsync, isLoading } =
+    useAddSubmissionMutation();
 
   async function handleSubmit(values: QuerySubmissionFormValues) {
-    const { id, answer } = values;
-    const data = await submitQueryMutateAsync({
-      id,
-      answer,
+    const { participant_id, answer } = values;
+    console.log(values);
+    const data = await addSubmissionMutateAsync({
+      competition_id: competitionId,
+      participant_id,
+      query: answer,
+      submission_ts: moment().unix(),
     });
     if (data) {
       message.success("Query submitted successfully!");
+      onClose();
     } else {
       message.error("Query failed.");
     }

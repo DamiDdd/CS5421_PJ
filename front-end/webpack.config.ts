@@ -97,7 +97,7 @@ const getStyleLoaders = (
         sourceMap: isEnvProduction && shouldUseSourceMap,
       },
     },
-  ].filter((Boolean as any) as ExcludesFalse);
+  ].filter(Boolean as any as ExcludesFalse);
 
   if (preProcessor) {
     loaders.push(
@@ -197,7 +197,7 @@ const config: webpack.Configuration = {
                   },
                 ],
                 isEnvDevelopment && require.resolve("react-refresh/babel"),
-              ].filter((Boolean as any) as ExcludesFalse),
+              ].filter(Boolean as any as ExcludesFalse),
               // This is a feature of `babel-loader` for webpack (not Babel itself).
               // It enables caching results in ./node_modules/.cache/babel-loader/
               // directory for faster rebuilds.
@@ -382,7 +382,7 @@ const config: webpack.Configuration = {
     //     {
     //   preset: "antdv3",
     // }
-  ].filter((Boolean as any) as ExcludesFalse),
+  ].filter(Boolean as any as ExcludesFalse),
   optimization: {
     minimize: isEnvProduction,
     minimizer: [

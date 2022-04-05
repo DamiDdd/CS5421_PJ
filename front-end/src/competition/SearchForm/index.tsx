@@ -17,7 +17,7 @@ function SearchForm(props: SearchFormProps) {
   const { month, competitionId, onMonthChange, onCompetitionChange } = props;
   const selectedMonth = month.format(MONTH_FORMAT);
   const { data, isFetching } = useCompetitionsQuery(selectedMonth);
-  const competitions = data?.competitions ?? [];
+  const competitions = data ?? [];
 
   return (
     <Form labelAlign="left" layout="inline" colon={false}>
@@ -40,7 +40,7 @@ function SearchForm(props: SearchFormProps) {
           loading={isFetching}
           value={competitionId}
           options={competitions.map((competition) => ({
-            label: competition.title!,
+            label: competition.name!,
             value: competition.id!,
           }))}
         />

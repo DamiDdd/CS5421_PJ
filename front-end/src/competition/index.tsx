@@ -32,13 +32,20 @@ const CompetitionPage = () => {
   const month = searchParams.get("month") ?? currentMonth.format(MONTH_FORMAT);
   // useMemoOne
   const monthMoment = moment(month);
-  const competitionId = searchParams.get("competition_id") ?? undefined;
+  const competitionId = searchParams.get("competition_id")
+    ? Number(searchParams.get("competition_id"))
+    : undefined;
+  console.log("COmpetition Id");
+  console.log(competitionId);
   const tab = searchParams.get("tab") ?? "leaderboard";
 
-  const { data } = useCompetitionByIdQuery(Number(competitionId));
+  const { data: competitionData } = useCompetitionByIdQuery(competitionId);
 
-  const competition = data?.competition;
-  const participants = data?.competition?.participants ?? [];
+  const competition = competitionData ?? undefined;
+  console.log(competition);
+
+  // const competition = data?.competition;
+  // const participants = data?.competition?.participants ?? [];
   const navigate = useNavigate();
 
   const handleTabChange = (tab: string) => {
@@ -94,7 +101,7 @@ const CompetitionPage = () => {
                   alignItems: "center",
                 }}
               >
-                Competition Descriptions
+                {competition.name}
                 <Button
                   className={s.submitQueryButton}
                   type="primary"
@@ -104,7 +111,9 @@ const CompetitionPage = () => {
                   Submit Query
                 </Button>
               </div>
+              {competition.description}
             </ContentCard>
+
             <ContentCard>
               <TabActionsContext.Provider value={setTabActions}>
                 <Tabs
@@ -114,7 +123,7 @@ const CompetitionPage = () => {
                   tabBarExtraContent={tabActions}
                 >
                   <Tabs.TabPane tab="Leaderboard" key="leaderboard">
-                    <Leaderboard participants={participants} />
+                    <Leaderboard competition={competition} />
                   </Tabs.TabPane>
                 </Tabs>
               </TabActionsContext.Provider>
@@ -129,6 +138,7 @@ const CompetitionPage = () => {
           <QuerySubmissionModal
             isOpen={isQuerySubmissionModalOpen}
             onClose={() => setIsQuerySubmissionModalOpen(false)}
+            competitionId={competition?.id}
           />
         )}
         <NewCompetitionModal

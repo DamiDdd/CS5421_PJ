@@ -1,28 +1,48 @@
 /* eslint-disable react/display-name */
+import React from "react";
+import { Tag } from "antd";
 import { ColumnProps } from "antd/lib/table";
-import { ParticipantData } from "src/_shared/api/mockApi";
+import { SubmissionData } from "src/_shared/api/api";
+
+enum SubmissionStatus {
+  PASS = 1,
+  FAIL = 2,
+  EVALUATING = 3,
+}
 
 export function useColumns() {
-  const columns: ColumnProps<ParticipantData>[] = [
+  const columns: ColumnProps<SubmissionData>[] = [
     {
-      title: "Participant ID",
-      dataIndex: "id",
-      key: "id",
+      title: "Matric No",
+      dataIndex: "participant_id",
+      key: "participant_id",
       fixed: "left",
       width: 160,
       sorter: { multiple: 1 },
     },
     {
-      title: "Score",
-      dataIndex: "score",
-      key: "score",
+      title: "Submission Status",
+      dataIndex: "submission_status",
+      key: "submission_status",
       width: 140,
       sorter: { multiple: 1 },
+      render: (value: any, _) => {
+        switch (value) {
+          case SubmissionStatus.PASS: {
+            return <Tag color={"green"}>PASS</Tag>;
+          }
+          case SubmissionStatus.FAIL: {
+            return <Tag color={"red"}>FAIL</Tag>;
+          }
+          default:
+            return <Tag color={"orange"}>EVALUATING</Tag>;
+        }
+      },
     },
     {
-      title: "Ranking",
-      dataIndex: "rank",
-      key: "rank",
+      title: "Time Spent",
+      dataIndex: "time_spend",
+      key: "time_spend",
       width: 140,
       sorter: { multiple: 1 },
     },

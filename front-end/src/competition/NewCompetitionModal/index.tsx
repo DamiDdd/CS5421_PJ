@@ -4,21 +4,23 @@ import moment from "moment";
 import { useForm } from "antd/lib/form/Form";
 import s from "./s.module.scss";
 import { useAddCompetitionMutation } from "src/_shared/mutations";
+import { getUnixDateTimeRangeForMonth } from "src/_shared/utils/date";
 
 const NEW_COMPETITION_FORM_ID = "new-competition-form";
 const requiredRule = { required: true, message: "Required" };
 const whiteSpaceRule = { whitespace: true, message: "Required" };
 
 enum CompetitionType {
-  SPEED = 1,
-  CORRECTNESS = 2,
+  FASTEST = 1,
+  SLOWEST = 2,
 }
 
 type NewCompetitionFormValues = {
-  competitionType: CompetitionType;
+  type: CompetitionType;
   title: string;
   description: string;
-  sample_solution: string;
+  answer_json: string;
+  period: string;
 };
 
 type NewCompetitionFormProps = {
@@ -45,18 +47,16 @@ function NewCompetitionForm(props: NewCompetitionFormProps) {
       labelCol={{ span: 6 }}
       wrapperCol={{ span: 17 }}
       initialValues={{
-        competitionType: CompetitionType.SPEED,
+        type: CompetitionType.FASTEST,
         period: month,
         name: "Competition",
       }}
       onFinish={onSubmit}
     >
-      <Form.Item name="competitionType" label="Type" rules={[requiredRule]}>
+      <Form.Item name="type" label="Type" rules={[requiredRule]}>
         <Radio.Group className={s.radioGroup}>
-          <Radio.Button value={CompetitionType.SPEED}>Speed</Radio.Button>
-          <Radio.Button value={CompetitionType.CORRECTNESS}>
-            Correctness
-          </Radio.Button>
+          <Radio.Button value={CompetitionType.FASTEST}>FASTEST</Radio.Button>
+          <Radio.Button value={CompetitionType.SLOWEST}>SLOWEST</Radio.Button>
         </Radio.Group>
       </Form.Item>
       <Form.Item
@@ -70,7 +70,7 @@ function NewCompetitionForm(props: NewCompetitionFormProps) {
         <Input.TextArea maxLength={255} />
       </Form.Item>
       <Form.Item
-        name="sample_solution"
+        name="answer_json"
         label="Sample Solution"
         rules={[requiredRule]}
       >
@@ -87,16 +87,19 @@ function NewCompetitionModal(props: NewCompetitionModalProps) {
     useAddCompetitionMutation();
 
   async function handleSubmit(values: NewCompetitionFormValues) {
-    const { competitionType, title, description, sample_solution } = values;
-    console.log(competitionType);
+    const { type, title, description, answer_json, period } = values;
+    const [from, to] = getUnixDateTimeRangeForMonth(period);
     const data = await addCompetitionMutateAsync({
-      // competitionType,
-      title,
+      type,
+      start_time: from,
+      end_time: to,
+      name: title,
       description,
-      sample_solution,
+      answer_json,
     });
     if (data) {
       message.success("Competition added successfully!");
+      onClose();
     } else {
       message.error("Failed to add a competition");
     }
@@ -109,6 +112,8 @@ function NewCompetitionModal(props: NewCompetitionModalProps) {
       onCancel={onClose}
       title="Create New Competition"
       closable={false}
+      maskClosable={false}
+      okText="Create"
       destroyOnClose
       okButtonProps={{
         htmlType: "submit",

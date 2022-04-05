@@ -1,15 +1,28 @@
-import { Table } from "antd";
+import { Spin, Table } from "antd";
 import React from "react";
-import { ParticipantData } from "src/_shared/api/mockApi";
+import { useSearchParams } from "react-router-dom";
+import { CompetitionData } from "src/_shared/api/api";
+import { useSubmissionsQuery } from "src/_shared/queries";
 import { useColumns } from "./columns";
 
 export type LeaderboardProps = {
-  participants: ParticipantData[];
+  competition: CompetitionData;
 };
 
-function Leaderboard({ participants }: LeaderboardProps) {
+function Leaderboard(props: LeaderboardProps) {
+  const [searchParams] = useSearchParams();
+  const competitionId = searchParams.get("competition_id") ?? undefined;
+  const { data: submissionsData, isFetching } = useSubmissionsQuery(
+    Number(competitionId)
+  );
+  const submissions = submissionsData ?? [];
+
   const columns = useColumns();
-  return <Table dataSource={participants} columns={columns} />;
+  return (
+    <Spin spinning={isFetching}>
+      <Table dataSource={submissions} columns={columns} />
+    </Spin>
+  );
 }
 
 export default Leaderboard;

@@ -1,12 +1,15 @@
 import { useMutation, useQueryClient } from "react-query";
-import { addCompetition, submitQuery } from "../api/mockApi";
+import { addCompetition, addSubmission } from "../api/api";
 import { QueryKey } from "../queries";
 
 export function useAddCompetitionMutation() {
   const queryClient = useQueryClient();
   return useMutation(
-    async (params: Record<string, string>) => {
-      const { data } = await addCompetition(params);
+    async (params: Record<string, any>) => {
+      const data = await addCompetition(params);
+      // console.log(response);
+      console.log("Data from add competition API");
+      console.log(data);
       return data;
     },
     {
@@ -17,16 +20,17 @@ export function useAddCompetitionMutation() {
   );
 }
 
-export function useSubmitQueryMutation() {
+export function useAddSubmissionMutation() {
   const queryClient = useQueryClient();
   return useMutation(
-    async (params: Record<string, string>) => {
-      const { data } = await submitQuery(params);
+    async (params: Record<string, any>) => {
+      const data = await addSubmission(params);
       return data;
     },
     {
       onSuccess: () => {
         queryClient.invalidateQueries(QueryKey.COMPETITION);
+        queryClient.invalidateQueries(QueryKey.SUBMISSION);
       },
     }
   );

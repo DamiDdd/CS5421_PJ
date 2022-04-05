@@ -10,11 +10,15 @@ from flask_admin import Admin, AdminIndexView
 from flask_admin.contrib.sqla import ModelView
 from flask_admin.model import BaseModelView
 
+
 from flask import g
 import sqlite3
 import threading
 import time
 import sql_analyse.linkDataset
+
+from flask_cors import CORS, cross_origin
+# Added for CORS
 
 # TODO uncomment this line and change it to correct stuff
 db_conn = sql_analyse.linkDataset.setup(database="test1", password="")
@@ -22,6 +26,9 @@ db_conn = sql_analyse.linkDataset.setup(database="test1", password="")
 DATABASE = "database.db"  # sql
 
 app = Flask(__name__)
+# Added for CORS
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
 app.config["SECRET_KEY"] = "any secret key"
 conn = sqlite3.connect(DATABASE, check_same_thread=False)
 sql_create_Competition_table = """ CREATE TABLE IF NOT EXISTS Competition (
@@ -34,6 +41,15 @@ sql_create_Competition_table = """ CREATE TABLE IF NOT EXISTS Competition (
                                     type INT
                                 ); """
 # what is submission_ts?
+# sql_create_Submission_table = """ CREATE TABLE IF NOT EXISTS Submission (
+#                                     id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+#                                     participant_id INT NOT NULL,
+#                                     competition_id INT NOT NULL,
+#                                     submission_ts INT,
+#                                     query VARCHAR(1000),
+#                                     submission_status INT,
+#                                     time_spent INT
+#                                 ); """
 sql_create_Submission_table = """ CREATE TABLE IF NOT EXISTS Submission (
                                     id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
                                     participant_id varchar(20) NOT NULL,
@@ -130,7 +146,7 @@ def list_competitions():
     c = conn.cursor()
     all_comp = []
     c.execute(
-        f"SELECT id FROM Competition WHERE start_time <{to_ts} AND end_time >{from_ts};"
+        f"SELECT * FROM Competition WHERE start_time <{to_ts} AND end_time >{from_ts};"
     )
     for i in c.fetchall():
         id, name, des, start, end, _, _ = i
@@ -184,8 +200,8 @@ def add_submission():
 
     c = conn.cursor()
     sql = f""" INSERT INTO submission(participant_id,competition_id, query, submission_ts, submission_status)
-              VALUES({participant_id},{competition_id},"{query}",{submission_ts},{int(submission_status.EVALUATING.value)}) """
-    # print(sql)
+              VALUES("{participant_id}",{competition_id},"{query}",{submission_ts},{int(submission_status.EVALUATING.value)}) """
+    print(sql)
     try:
         res = c.execute(sql)
         submission_id = res.lastrowid
