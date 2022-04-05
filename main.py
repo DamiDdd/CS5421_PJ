@@ -36,7 +36,7 @@ sql_create_Competition_table = """ CREATE TABLE IF NOT EXISTS Competition (
 # what is submission_ts?
 sql_create_Submission_table = """ CREATE TABLE IF NOT EXISTS Submission (
                                     id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-                                    participant_id INT NOT NULL,
+                                    participant_id varchar(20) NOT NULL,
                                     competition_id INT NOT NULL,
                                     submission_ts INT,
                                     query VARCHAR(1000),
@@ -75,9 +75,9 @@ def insert_competition():
 
 def create_tables():
     c = conn.cursor()
-    # c.execute("DROP table Competition")
-    # c.execute("DROP table Submission")
-    # c.execute("DROP table Participant")
+    c.execute("DROP table Competition")
+    c.execute("DROP table Submission")
+    c.execute("DROP table Participant")
     c.execute("SELECT name FROM sqlite_master WHERE type='table';")
     # tabs =c.fetchall()
     # print(tabs)
@@ -307,7 +307,7 @@ def list_submissions_by_participant():
     participant_id = record.get("participant_id")
     c = conn.cursor()
     sql = f"""SELECT * FROM submission
-              WHERE participant_id={str(participant_id)}
+              WHERE participant_id="{str(participant_id)}"
                """
     c.execute(sql)
     res = c.fetchall()
