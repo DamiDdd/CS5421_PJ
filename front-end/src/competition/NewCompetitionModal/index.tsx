@@ -19,7 +19,7 @@ type NewCompetitionFormValues = {
   type: CompetitionType;
   title: string;
   description: string;
-  answer_json: string;
+  answer: string;
   period: string;
 };
 
@@ -69,11 +69,7 @@ function NewCompetitionForm(props: NewCompetitionFormProps) {
       <Form.Item name="description" label="Competition Description">
         <Input.TextArea maxLength={255} />
       </Form.Item>
-      <Form.Item
-        name="answer_json"
-        label="Sample Solution"
-        rules={[requiredRule]}
-      >
+      <Form.Item name="answer" label="Sample Solution" rules={[requiredRule]}>
         <Input.TextArea maxLength={255} />
       </Form.Item>
     </Form>
@@ -87,7 +83,7 @@ function NewCompetitionModal(props: NewCompetitionModalProps) {
     useAddCompetitionMutation();
 
   async function handleSubmit(values: NewCompetitionFormValues) {
-    const { type, title, description, answer_json, period } = values;
+    const { type, title, description, answer, period } = values;
     const [from, to] = getUnixDateTimeRangeForMonth(period);
     const data = await addCompetitionMutateAsync({
       type,
@@ -95,7 +91,7 @@ function NewCompetitionModal(props: NewCompetitionModalProps) {
       end_time: to,
       name: title,
       description,
-      answer_json,
+      answer,
     });
     if (data) {
       message.success("Competition added successfully!");

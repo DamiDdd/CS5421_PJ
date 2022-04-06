@@ -97,3 +97,15 @@ uninstall(conn)
 
 # close the connection
 # uninstall(conn)
+
+# SELECT per.empid, per.lname
+# FROM employee per FULL OUTER JOIN payroll pay
+# ON per.empid = pay.empid AND pay.salary <> 189170
+# WHERE per.empid = pay.empid
+# ORDER BY per.empid, per.lname;
+
+# SELECT per.empid, per.lname
+# FROM employee per FULL OUTER JOIN payroll pay
+# ON per.empid = pay.empid AND pay.salary > 40000
+# WHERE per.empid = pay.empid
+# ORDER BY per.empid, per.lname;

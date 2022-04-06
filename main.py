@@ -41,15 +41,6 @@ sql_create_Competition_table = """ CREATE TABLE IF NOT EXISTS Competition (
                                     type INT
                                 ); """
 # what is submission_ts?
-# sql_create_Submission_table = """ CREATE TABLE IF NOT EXISTS Submission (
-#                                     id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-#                                     participant_id INT NOT NULL,
-#                                     competition_id INT NOT NULL,
-#                                     submission_ts INT,
-#                                     query VARCHAR(1000),
-#                                     submission_status INT,
-#                                     time_spent INT
-#                                 ); """
 sql_create_Submission_table = """ CREATE TABLE IF NOT EXISTS Submission (
                                     id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
                                     participant_id varchar(20) NOT NULL,
@@ -225,28 +216,30 @@ def add_submission():
 
 def check_submission(submission_id, competition_id, query):
     get_answer_sql = f"""
-        SELECT answer FROM competition where id = {competition_id}
+        SELECT answer FROM competition where id = {competition_id};
     """
 
     c = conn.cursor()
+    c.execute(get_answer_sql)
     res = c.fetchall()
+    
     if not res:
         update_sql = f"""UPDATE submission SET submission_status = {submission_status.FAILED.value} where id = {submission_id} """
         c.execute(update_sql)
         c.close()
         conn.commit()
 
-    answer = res[0]
-    res1 = sql_analyse.linkDataset.exe_sql_with_res(answer)
-    res2 = sql_analyse.linkDataset.exe_sql_with_res(query)
+    answer = res[0][0]
+
+    res1 = sql_analyse.linkDataset.exe_sql_with_res(db_conn, answer)
+    res2 = sql_analyse.linkDataset.exe_sql_with_res(db_conn, query)
     passed = sql_analyse.linkDataset.compare_ans(res1, res2, True)
     if passed:
-        time_spent = sql_analyse.linkDataset.analyse_sql(conn, query, 100)
+        time_spent = sql_analyse.linkDataset.analyse_sql(db_conn, query, 100)
         update_sql = f"""UPDATE submission SET submission_status = {submission_status.PASSED.value}, time_spent={time_spent} where id = {submission_id} """
         c.execute(update_sql)
         c.close()
         conn.commit()
-
         # update submission with pass
     else:
         update_sql = f"""UPDATE submission SET submission_status = {submission_status.FAILED.value} where id = {submission_id} """
