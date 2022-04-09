@@ -1,3 +1,4 @@
+from audioop import minmax
 import enum
 import json
 from operator import truediv
@@ -18,6 +19,7 @@ import time
 import sql_analyse.linkDataset
 
 from flask_cors import CORS, cross_origin
+
 # Added for CORS
 
 # TODO uncomment this line and change it to correct stuff
@@ -28,7 +30,7 @@ DATABASE = "database.db"  # sql
 app = Flask(__name__)
 # Added for CORS
 cors = CORS(app)
-app.config['CORS_HEADERS'] = 'Content-Type'
+app.config["CORS_HEADERS"] = "Content-Type"
 app.config["SECRET_KEY"] = "any secret key"
 conn = sqlite3.connect(DATABASE, check_same_thread=False)
 sql_create_Competition_table = """ CREATE TABLE IF NOT EXISTS Competition (
@@ -222,7 +224,7 @@ def check_submission(submission_id, competition_id, query):
     c = conn.cursor()
     c.execute(get_answer_sql)
     res = c.fetchall()
-    
+
     if not res:
         update_sql = f"""UPDATE submission SET submission_status = {submission_status.FAILED.value} where id = {submission_id} """
         c.execute(update_sql)
@@ -273,33 +275,40 @@ def list_submissions_by_competition():
     # competition_id, passed
     record = json.loads(request.data)
     competition_id = record.get("competition_id")
-    passed = record.get("passed", None)
     c = conn.cursor()
-    sql = f"""SELECT * FROM submission
+
+    sql = f"""SELECT type from Competition 
+                WHERE competition_id={str(competition_id)}
+            """
+    c.execute(sql)
+    res = c.fetchall()
+    comp_type = res[0]
+
+    c.close()
+    conn.commit()
+
+    minOrMax = "MIN"
+    if comp_type == 2:
+        minOrMax = "MAX"
+    c = conn.cursor()
+    sql = f"""SELECT participant_id, submission_status,{minOrMax}(time_spent) as FROM submission
               WHERE competition_id={str(competition_id)}
+              AND submission_status = 2;
+              GROUP BY participant_id
                """
-    sql = sql + ";" if not passed else sql + f" AND submission_status = 2;"
     print(sql)
     c.execute(sql)
     res = c.fetchall()
     all_submissions = []
     for r in res:
         (
-            id,
             participant_id,
-            competition_id,
-            submission_ts,
-            query,
             submission_status,
             time_spend,
         ) = r
         all_submissions.append(
             {
-                "id": id,
                 "participant_id": participant_id,
-                "competition_id": competition_id,
-                "submission_ts": submission_ts,
-                "query": query,
                 "submission_status": submission_status,
                 "time_spend": time_spend,
             }
@@ -340,6 +349,30 @@ def list_submissions_by_participant():
                 "query": query,
                 "submission_status": submission_status,
                 "time_spend": time_spend,
+            }
+        )
+    c.close()
+    conn.commit()
+    return jsonify(all_submissions)
+
+
+@app.route("/list_participants_by_competition", methods=["POST"])
+def list_participants_by_competition():
+    # participant_id
+    record = json.loads(request.data)
+    competition_id = record.get("competition_id")
+    c = conn.cursor()
+    sql = f"""SELECT distinct participant_id FROM submission
+              WHERE competition_id={str(competition_id)}
+               """
+    c.execute(sql)
+    res = c.fetchall()
+    all_submissions = []
+    for r in res:
+        (participant_id) = r
+        all_submissions.append(
+            {
+                "participant_id": participant_id,
             }
         )
     c.close()
