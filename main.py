@@ -282,7 +282,7 @@ def list_submissions_by_competition():
             """
     c.execute(sql)
     res = c.fetchall()
-    comp_type = res[0]
+    (comp_type) = res[0]
 
     c.close()
     conn.commit()
