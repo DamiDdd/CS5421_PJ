@@ -4,12 +4,15 @@ import re
 syntaxMsg = "Syntax error in "
 IOMsg = "IO error: couldn't find "
 
+
 def exe_sql_with_res(conn, sql):
     pointer = conn.cursor()
     try:
         pointer.execute(sql)
     except psycopg2.Error:
         print(syntaxMsg + sql)
+        pointer.close()
+        conn.commit()
     else:
         res = pointer.fetchall()
         return res
@@ -46,7 +49,8 @@ def exe_sql_file(conn, filepath):
 
 
 def setup(database, password, user="postgres", host="localhost", port="5432"):
-    conn = psycopg2.connect(database=database, user=user, password=password, host=host, port=port)
+    conn = psycopg2.connect(database=database, user=user,
+                            password=password, host=host, port=port)
     # init test function
     print(exe_sql_file(conn, 'sql_analyse/testFunction.sql'))
     return conn

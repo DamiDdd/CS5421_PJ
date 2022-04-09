@@ -1,4 +1,8 @@
-import { CloudUploadOutlined, PlusOutlined } from "@ant-design/icons";
+import {
+  CloudUploadOutlined,
+  PlusOutlined,
+  ReloadOutlined,
+} from "@ant-design/icons";
 import { Button, Empty, Tabs } from "antd";
 import moment from "moment";
 import React from "react";
@@ -9,7 +13,7 @@ import {
   ContentTitle,
 } from "src/_shared/components/Content";
 import { MONTH_FORMAT } from "src/_shared/constants";
-import { useCompetitionByIdQuery } from "src/_shared/queries";
+import { QueryKey, useCompetitionByIdQuery } from "src/_shared/queries";
 import Leaderboard from "./Leaderboard";
 import NewCompetitionModal from "./NewCompetitionModal";
 import SearchForm from "./SearchForm";
@@ -18,6 +22,7 @@ import s from "./s.module.scss";
 import QuerySubmissionModal from "./QuerySubmissionModal";
 import ParticipantsSearchForm from "./ParticipantsSearchForm";
 import Submissions from "./Submissions";
+import { useQueryClient } from "react-query";
 
 const CompetitionPage = () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -27,6 +32,7 @@ const CompetitionPage = () => {
   const [isQuerySubmissionModalOpen, setIsQuerySubmissionModalOpen] =
     React.useState(false);
   const [tabActions, setTabActions] = React.useState<React.ReactNode>(null);
+  const queryClient = useQueryClient();
 
   // useMemoOne
   const currentMonth = moment().startOf("month");
@@ -52,6 +58,10 @@ const CompetitionPage = () => {
   // const competition = data?.competition;
   // const participants = data?.competition?.participants ?? [];
   const navigate = useNavigate();
+
+  const handleReload = () => {
+    queryClient.invalidateQueries(QueryKey.SUBMISSION);
+  };
 
   const handleTabChange = (tab: string) => {
     setTabActions(null);
@@ -112,27 +122,37 @@ const CompetitionPage = () => {
         {competition ? (
           <>
             <ContentCard>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
+              <div className={s.card}>
                 {competition.name}
-                <ParticipantsSearchForm
-                  onParticipantChange={handleParticipantChange}
-                  competitionId={competitionId}
-                  participantId={participantId}
-                />
-                <Button
-                  className={s.submitQueryButton}
-                  type="primary"
-                  onClick={() => setIsQuerySubmissionModalOpen(true)}
-                  icon={<CloudUploadOutlined />}
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
                 >
-                  Submit Query
-                </Button>
+                  <ParticipantsSearchForm
+                    onParticipantChange={handleParticipantChange}
+                    competitionId={competitionId}
+                    participantId={participantId}
+                  />
+                  <Button
+                    type="primary"
+                    className={s.reloadButton}
+                    onClick={handleReload}
+                    icon={<ReloadOutlined />}
+                  >
+                    Reload
+                  </Button>
+                  <Button
+                    type="primary"
+                    className={s.submitQueryButton}
+                    onClick={() => setIsQuerySubmissionModalOpen(true)}
+                    icon={<CloudUploadOutlined />}
+                  >
+                    Submit Query
+                  </Button>
+                </div>
               </div>
               {competition.description}
             </ContentCard>

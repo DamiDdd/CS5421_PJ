@@ -10,5 +10,15 @@
 }
 
 .submitQueryButton {
-  margin-left: auto;
+  margin-left: var(--spacing-xsmall);
+}
+
+.reloadButton {
+  margin-left: var(--spacing-xsmall);
+}
+
+.card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }

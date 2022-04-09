@@ -235,6 +235,13 @@ def check_submission(submission_id, competition_id, query):
 
     res1 = sql_analyse.linkDataset.exe_sql_with_res(db_conn, answer)
     res2 = sql_analyse.linkDataset.exe_sql_with_res(db_conn, query)
+    if not res1 or not res2:
+        update_sql = f"""UPDATE submission SET submission_status = {submission_status.FAILED.value} where id = {submission_id} """
+        c.execute(update_sql)
+        c.close()
+        conn.commit()
+        return
+
     passed = sql_analyse.linkDataset.compare_ans(res1, res2, True)
     if passed:
         time_spent = sql_analyse.linkDataset.analyse_sql(db_conn, query, 100)
@@ -292,7 +299,7 @@ def list_submissions_by_competition():
     if comp_type == 2:
         minOrMax = "MAX"
         order = "DESC"
-    
+
     c = conn.cursor()
     sql = f"""SELECT participant_id, submission_status,{minOrMax}(time_spent) as result FROM submission
               WHERE competition_id={str(competition_id)}
@@ -373,7 +380,7 @@ def list_participants_by_competition():
     res = c.fetchall()
     all_submissions = []
     for r in res:
-        (participant_id) = r
+        (participant_id) = r[0]
         all_submissions.append(
             {
                 "participant_id": participant_id,
