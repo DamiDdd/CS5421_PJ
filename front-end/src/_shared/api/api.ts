@@ -19,9 +19,14 @@ export type SubmissionData = {
   time_spent: number;
 };
 
+export type ParticipantData = {
+  participant_id: string;
+};
+
 export type getCompetitionResponseData = CompetitionData[] | undefined;
 export type getCompetitionByIdResponseData = CompetitionData | undefined;
 export type getSubmissionResponseData = SubmissionData[] | undefined;
+export type getParticipantsResponseData = ParticipantData[] | undefined;
 
 export function addCompetition(params: Record<string, any>): any {
   return fetchClient(`${BASE_URL}/add_competition`, { body: params });
@@ -31,12 +36,22 @@ export function listCompetitions(params: Record<string, any>): any {
   return fetchClient(`${BASE_URL}/list_competitions`, { body: params });
 }
 
+export function listParticipants(params: Record<string, any>): any {
+  return fetchClient(`${BASE_URL}/list_participants`, { body: params });
+}
+
 export function getCompetitionById(params: Record<string, any>): any {
   return fetchClient(`${BASE_URL}/get_competition`, { body: params });
 }
 
-export function getSubmissions(params: Record<string, any>): any {
+export function getCompetitionSubmissions(params: Record<string, any>): any {
   return fetchClient(`${BASE_URL}/list_submissions_by_competition`, {
+    body: params,
+  });
+}
+
+export function getParticipantSubmissions(params: Record<string, any>): any {
+  return fetchClient(`${BASE_URL}/list_submissions_by_participant`, {
     body: params,
   });
 }

@@ -31,6 +31,7 @@ export function useAddSubmissionMutation() {
       onSuccess: () => {
         queryClient.invalidateQueries(QueryKey.COMPETITION);
         queryClient.invalidateQueries(QueryKey.SUBMISSION);
+        queryClient.invalidateQueries(QueryKey.PARTICIPANTS);
       },
     }
   );

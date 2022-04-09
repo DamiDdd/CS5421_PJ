@@ -16,6 +16,8 @@ import SearchForm from "./SearchForm";
 import { TabActionsContext } from "./TabActionsContext";
 import s from "./s.module.scss";
 import QuerySubmissionModal from "./QuerySubmissionModal";
+import ParticipantsSearchForm from "./ParticipantsSearchForm";
+import Submissions from "./Submissions";
 
 const CompetitionPage = () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -37,6 +39,9 @@ const CompetitionPage = () => {
     : undefined;
   console.log("COmpetition Id");
   console.log(competitionId);
+  const participantId = searchParams.get("participant_id") ?? undefined;
+  console.log("Participant Id");
+  console.log(participantId);
   const tab = searchParams.get("tab") ?? "leaderboard";
 
   const { data: competitionData } = useCompetitionByIdQuery(competitionId);
@@ -50,7 +55,9 @@ const CompetitionPage = () => {
 
   const handleTabChange = (tab: string) => {
     setTabActions(null);
-    navigate(`${location.pathname}?tab=${tab}&competition_id=${competitionId}`);
+    navigate(
+      `${location.pathname}?tab=${tab}&competition_id=${competitionId}&participant_id=${participantId}`
+    );
   };
 
   function handleMonthChange(month: moment.Moment) {
@@ -67,6 +74,17 @@ const CompetitionPage = () => {
         `${location.pathname}?tab=${tab}&month=${monthMoment.format(
           MONTH_FORMAT
         )}&competition_id=${id}`
+      );
+    }
+  }
+
+  function handleParticipantChange(id: string) {
+    console.log(id);
+    if (id) {
+      navigate(
+        `${location.pathname}?tab=${tab}&month=${monthMoment.format(
+          MONTH_FORMAT
+        )}&competition_id=${competitionId}&participant_id=${id}`
       );
     }
   }
@@ -102,6 +120,11 @@ const CompetitionPage = () => {
                 }}
               >
                 {competition.name}
+                <ParticipantsSearchForm
+                  onParticipantChange={handleParticipantChange}
+                  competitionId={competitionId}
+                  participantId={participantId}
+                />
                 <Button
                   className={s.submitQueryButton}
                   type="primary"
@@ -123,7 +146,10 @@ const CompetitionPage = () => {
                   tabBarExtraContent={tabActions}
                 >
                   <Tabs.TabPane tab="Leaderboard" key="leaderboard">
-                    <Leaderboard competition={competition} />
+                    <Leaderboard />
+                  </Tabs.TabPane>
+                  <Tabs.TabPane tab="Submissions" key="submissions">
+                    <Submissions />
                   </Tabs.TabPane>
                 </Tabs>
               </TabActionsContext.Provider>

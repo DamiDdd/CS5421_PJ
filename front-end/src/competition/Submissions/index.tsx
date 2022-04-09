@@ -1,15 +1,15 @@
 import { Spin, Table } from "antd";
 import React from "react";
 import { useSearchParams } from "react-router-dom";
-import { useCompetitionSubmissionsQuery } from "src/_shared/queries";
+import { useParticipantSubmissionsQuery } from "src/_shared/queries";
 import { useColumns } from "./columns";
 
-function Leaderboard() {
+function Submissions() {
   const [searchParams] = useSearchParams();
-  const competitionId = searchParams.get("competition_id") ?? undefined;
-  const { data: submissionsData, isFetching } = useCompetitionSubmissionsQuery(
-    Number(competitionId)
-  );
+  const participantId = searchParams.get("participant_id") ?? undefined;
+  console.log("Submissions Participant Id");
+  const { data: submissionsData, isFetching } =
+    useParticipantSubmissionsQuery(participantId);
   const submissions = submissionsData ?? [];
 
   const columns = useColumns();
@@ -20,4 +20,4 @@ function Leaderboard() {
   );
 }
 
-export default Leaderboard;
+export default Submissions;

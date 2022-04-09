@@ -71,12 +71,12 @@ def compare_ans(ans1, ans2, order=False):
 # connect, input your own config here
 # conn = setup("PJ1", "123456")
 
-conn = setup("test1", "")
-sql_test1 = "select * from Submission;"
-sql_res1 = exe_sql_with_res(conn, sql_test1)
-print("test")
-print(sql_res1)
-uninstall(conn)
+# conn = setup("test1", "")
+# sql_test1 = "select * from Submission;"
+# sql_res1 = exe_sql_with_res(conn, sql_test1)
+# print("test")
+# print(sql_res1)
+# uninstall(conn)
 
 # sql_test1 = "SELECT per.empid, per.lname " \
 #             "FROM employee per FULL OUTER JOIN payroll pay  " \

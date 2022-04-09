@@ -4,8 +4,11 @@ import {
   getCompetitionResponseData,
   getCompetitionById,
   getCompetitionByIdResponseData,
-  getSubmissions,
   getSubmissionResponseData,
+  getCompetitionSubmissions,
+  getParticipantSubmissions,
+  getParticipantsResponseData,
+  listParticipants,
 } from "../api/api";
 import { getUnixDateTimeRangeForMonth } from "../utils/date";
 
@@ -13,6 +16,7 @@ export enum QueryKey {
   COMPETITION = "COMPETITION",
   COMPETITION_BY_ID = "COMPETITION_BY_ID",
   SUBMISSION = "SUBMISSION",
+  PARTICIPANTS = "PARTICIPANTS",
 }
 
 export function useCompetitionsQuery(
@@ -58,7 +62,7 @@ export function useCompetitionByIdQuery(
   );
 }
 
-export function useSubmissionsQuery(
+export function useCompetitionSubmissionsQuery(
   id: number,
   options?: UseQueryOptions<
     getSubmissionResponseData,
@@ -69,7 +73,48 @@ export function useSubmissionsQuery(
   return useQuery(
     [QueryKey.SUBMISSION, { id }],
     async () => {
-      const response = await getSubmissions({
+      const response = await getCompetitionSubmissions({
+        competition_id: id,
+      });
+      return response;
+    },
+    options
+  );
+}
+
+export function useParticipantSubmissionsQuery(
+  id?: string,
+  options?: UseQueryOptions<
+    getSubmissionResponseData,
+    unknown,
+    getSubmissionResponseData
+  >
+) {
+  return useQuery(
+    [QueryKey.SUBMISSION, { id }],
+    async () => {
+      const response = await getParticipantSubmissions({
+        participant_id: id,
+      });
+      return response;
+    },
+    options
+  );
+}
+
+export function useParticipantsQuery(
+  id: number | undefined,
+  options?: UseQueryOptions<
+    getParticipantsResponseData,
+    unknown,
+    getParticipantsResponseData
+  >
+) {
+  return useQuery(
+    [QueryKey.PARTICIPANTS, { id }],
+    async () => {
+      if (typeof id === "undefined") return;
+      const response = await listParticipants({
         competition_id: id,
       });
       return response;
