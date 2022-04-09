@@ -293,7 +293,7 @@ def list_submissions_by_competition():
     c = conn.cursor()
     sql = f"""SELECT participant_id, submission_status,{minOrMax}(time_spent) as FROM submission
               WHERE competition_id={str(competition_id)}
-              AND submission_status = 2;
+              AND submission_status = 2
               GROUP BY participant_id
                """
     print(sql)
