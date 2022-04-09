@@ -292,11 +292,12 @@ def list_submissions_by_competition():
     if comp_type == 2:
         minOrMax = "MAX"
         order = "DESC"
+    
     c = conn.cursor()
     sql = f"""SELECT participant_id, submission_status,{minOrMax}(time_spent) as result FROM submission
               WHERE competition_id={str(competition_id)}
               AND submission_status = 2
-              GROUP BY participant_id
+              GROUP BY participant_id, submission_status
               ORDER BY result {order}
                """
     print(sql)
