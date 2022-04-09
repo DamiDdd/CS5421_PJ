@@ -278,7 +278,7 @@ def list_submissions_by_competition():
     c = conn.cursor()
 
     sql = f"""SELECT type from Competition 
-                WHERE competition_id={str(competition_id)}
+                WHERE id={str(competition_id)}
             """
     c.execute(sql)
     res = c.fetchall()
@@ -296,7 +296,7 @@ def list_submissions_by_competition():
     c = conn.cursor()
     sql = f"""SELECT participant_id, submission_status,{minOrMax}(time_spent) as result FROM submission
               WHERE competition_id={str(competition_id)}
-              AND submission_status = 2
+              AND submission_status = 1
               GROUP BY participant_id, submission_status
               ORDER BY result {order}
                """
