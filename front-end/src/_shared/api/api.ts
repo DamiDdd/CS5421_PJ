@@ -37,7 +37,9 @@ export function listCompetitions(params: Record<string, any>): any {
 }
 
 export function listParticipants(params: Record<string, any>): any {
-  return fetchClient(`${BASE_URL}/list_participants`, { body: params });
+  return fetchClient(`${BASE_URL}/list_participants_by_competition`, {
+    body: params,
+  });
 }
 
 export function getCompetitionById(params: Record<string, any>): any {
