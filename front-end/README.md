@@ -5,11 +5,18 @@ If you are using Node 17, export the following to your environment before starti
 ```
 $ export NODE_OPTIONS=--openssl-legacy-provider
 ```
-
+1. Download NodeJs v16 (LTS) from https://nodejs.org/en/.
+2. Execute the following to install yarn package manager.
+```
+$ npm install --global yarn
+```
+3. Execute the following command to install all project dependencies.
 ```
 # Install all project dependencies listed in package.json.
 $ yarn install
-
-# Start the project in local dev server.
+```
+4. Start project is local dev server.
+```
+# Project will be started at http://localhost:3000
 $ yarn start
 ```
