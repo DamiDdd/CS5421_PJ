@@ -1,4 +1,4 @@
-# sql-leaderboard
+# CS5421_PJ - Frontend
 
 To run the project, make sure you are using Node LTS version.
 If you are using Node 17, export the following to your environment before starting the project
