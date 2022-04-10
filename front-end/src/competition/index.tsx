@@ -43,17 +43,12 @@ const CompetitionPage = () => {
   const competitionId = searchParams.get("competition_id")
     ? Number(searchParams.get("competition_id"))
     : undefined;
-  console.log("COmpetition Id");
-  console.log(competitionId);
-  const participantId = searchParams.get("participant_id") ?? undefined;
-  console.log("Participant Id");
-  console.log(participantId);
+  const participantId = searchParams.get("participant_id") ?? "";
   const tab = searchParams.get("tab") ?? "leaderboard";
 
   const { data: competitionData } = useCompetitionByIdQuery(competitionId);
 
   const competition = competitionData ?? undefined;
-  console.log(competition);
 
   // const competition = data?.competition;
   // const participants = data?.competition?.participants ?? [];

@@ -1,24 +1,29 @@
-from audioop import minmax
-import enum
-import json
-from operator import truediv
-from flask import Flask, request, jsonify
-from flask import Flask, render_template, url_for, request, g, flash, redirect
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
-from flask_login import current_user, LoginManager, login_user, logout_user, UserMixin
-from flask_admin import Admin, AdminIndexView
-from flask_admin.contrib.sqla import ModelView
 from flask_admin.model import BaseModelView
-
-
+from flask_admin.contrib.sqla import ModelView
+from flask_admin import Admin, AdminIndexView
+from flask_login import current_user, LoginManager, login_user, logout_user, UserMixin
+from flask_migrate import Migrate
+from flask_sqlalchemy import SQLAlchemy
+from flask import Flask, render_template, url_for, request, g, flash, redirect
+from flask import Flask, request, jsonify
+from operator import truediv
+import json
+import enum
+from audioop import minmax
 from flask import g
 import sqlite3
 import threading
 import time
-import sql_analyse.linkDataset
 
+import sys
+sys.path.append('../')
+
+import sql_analyse.linkDataset
 from flask_cors import CORS, cross_origin
+
+
+
+
 
 # Added for CORS
 
@@ -235,6 +240,7 @@ def check_submission(submission_id, competition_id, query):
 
     res1 = sql_analyse.linkDataset.exe_sql_with_res(db_conn, answer)
     res2 = sql_analyse.linkDataset.exe_sql_with_res(db_conn, query)
+
     if not res1 or not res2:
         update_sql = f"""UPDATE submission SET submission_status = {submission_status.FAILED.value} where id = {submission_id} """
         c.execute(update_sql)
@@ -289,7 +295,7 @@ def list_submissions_by_competition():
             """
     c.execute(sql)
     res = c.fetchall()
-    (comp_type) = res[0]
+    comp_type = res[0][0]
 
     c.close()
     conn.commit()
